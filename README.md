@@ -1,21 +1,34 @@
-# TanStack Start + shadcn/ui
+# organización
 
-This is a template for a new TanStack Start project with React, TypeScript, and shadcn/ui.
+Plataforma de gestión financiera para la economía venezolana.
 
-## Adding components
+**Stack:** TanStack Start · Drizzle · libSQL · Dinero.js · OpenRouter (AI SDK)
 
-To add components to your app, run the following command:
+## Inicio rápido
 
 ```bash
-npx shadcn@latest add button
+cp .env.example .env
+pnpm install
+pnpm db:push
+pnpm db:seed
+pnpm dev
 ```
 
-This will place the ui components in the `components` directory.
+## Variables de entorno
 
-## Using components
+| Variable | Descripción |
+|---|---|
+| `TURSO_DATABASE_URL` | `file:local.db` en dev, `libsql://…` en prod |
+| `RATES_API_URL` | Default: `https://dolary.zoysoftware.com/api/rates` |
+| `OPENROUTER_API_KEY` | API key de [OpenRouter](https://openrouter.ai) |
+| `OPENROUTER_MODEL` | Default: `deepseek/deepseek-r1-distill-qwen-32b` (barato + razonamiento) |
 
-To use the components in your app, import them as follows:
+## Scripts
 
-```tsx
-import { Button } from "@/components/ui/button";
-```
+- `pnpm dev` — desarrollo
+- `pnpm db:push` — sincronizar esquema
+- `pnpm db:seed` — datos demo
+
+## UI
+
+Dark mode por defecto, Geist Mono, estética minimalista tipo Vercel — bordes sutiles, labels uppercase, barras de progreso de 1px.
