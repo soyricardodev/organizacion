@@ -32,3 +32,8 @@ pnpm dev
 ## UI
 
 Dark mode por defecto, Geist Mono, estética minimalista tipo Vercel — bordes sutiles, labels uppercase, barras de progreso de 1px.
+
+## Offline y PWA
+
+- **Offline hoy:** cache React Query + cola de mutaciones en `localStorage` + sync al reconectar.
+- **PWA (planificado):** ver [docs/PWA-PLAN.md](./docs/PWA-PLAN.md) — instalable, app shell precacheado, integración con TanStack Start + Nitro.
