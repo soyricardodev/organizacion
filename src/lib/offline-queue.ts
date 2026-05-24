@@ -1,12 +1,18 @@
+import type {
+  Category,
+  Currency,
+  MatchedRate,
+} from "@/domain/types"
+
 const QUEUE_KEY = "organizacion:pending-mutations"
 
 export interface PendingTransaction {
   id: string
   description: string
   originalAmountCents: number
-  originalCurrency: "VES" | "USD" | "EUR"
-  category: "needs" | "wants" | "savings" | "health" | "debt_payment"
-  matchedRate: "bcv" | "euro_bcv" | "paralelo"
+  originalCurrency: Currency
+  category: Category
+  matchedRate: MatchedRate
   enqueuedAt: number
 }
 

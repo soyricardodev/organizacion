@@ -11,15 +11,9 @@ export const BUDGET_RULE = {
   savings: 0.2,
 } as const
 
-export const CATEGORIES = [
-  "needs",
-  "wants",
-  "savings",
-  "health",
-  "debt_payment",
-] as const
+import type { Category } from "@/domain/types"
 
-export type Category = (typeof CATEGORIES)[number]
+export { CATEGORIES, type Category } from "@/domain/types"
 
 export const CATEGORY_LABELS: Record<Category, string> = {
   needs: "Necesidades",

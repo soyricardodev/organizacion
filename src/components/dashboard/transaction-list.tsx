@@ -2,7 +2,7 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import { CATEGORY_LABELS } from "@/lib/constants"
 import { formatUsd } from "@/lib/money"
-import type { Transaction } from "@/types/db"
+import type { Transaction } from "@/db/schema"
 
 interface TransactionListProps {
   transactions: Transaction[]

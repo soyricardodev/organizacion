@@ -1,14 +1,13 @@
 import { format } from "date-fns"
 import { z } from "zod"
+import { filterCategorySchema } from "@/domain/types"
 
 export const dashboardSearchSchema = z.object({
   month: z
     .string()
     .regex(/^\d{4}-\d{2}$/)
     .default(format(new Date(), "yyyy-MM")),
-  category: z
-    .enum(["all", "needs", "wants", "savings", "health", "debt_payment"])
-    .default("all"),
+  category: filterCategorySchema.default("all"),
   view: z.enum(["overview", "transactions", "add"]).default("overview"),
 })
 

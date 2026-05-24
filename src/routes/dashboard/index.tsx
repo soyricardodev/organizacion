@@ -1,17 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
-import { format } from "date-fns"
 import { Plus } from "lucide-react"
 import { dashboardSearchSchema } from "@/lib/search-params"
 import { queryKeys } from "@/lib/query-keys"
 import {
-  getActiveRates,
-  getTransactions,
-  getBuckets,
-  getDebts,
-  getDashboardSummary,
-} from "@/server/finance"
-import { getCachedInsight, generateWeeklyInsight, getAiStatus } from "@/server/ai"
+  dashboardQueries,
+  dashboardQueryList,
+} from "@/lib/dashboard-queries"
+import { generateWeeklyInsight } from "@/server/ai"
 import { RatesWidget } from "@/components/dashboard/rates-widget"
 import { RunwayIndicator } from "@/components/dashboard/runway-indicator"
 import { DebtTimeline } from "@/components/dashboard/debt-timeline"
@@ -31,43 +27,18 @@ import { useOnlineStatus } from "@/hooks/use-online-status"
 import { pendingCount, subscribeQueue } from "@/lib/offline-queue"
 import { cn } from "@/lib/utils"
 import { useSyncExternalStore } from "react"
+import { currentWeekKey } from "@/domain/dates"
 
 export const Route = createFileRoute("/dashboard/")({
   validateSearch: dashboardSearchSchema,
   loaderDeps: ({ search }) => ({ month: search.month, category: search.category }),
   loader: async ({ context, deps }) => {
     const { queryClient } = context
-    await Promise.all([
-      queryClient.ensureQueryData({
-        queryKey: queryKeys.rates,
-        queryFn: () => getActiveRates(),
-      }),
-      queryClient.ensureQueryData({
-        queryKey: queryKeys.transactions(deps.month, deps.category),
-        queryFn: () =>
-          getTransactions({ data: { month: deps.month, category: deps.category } }),
-      }),
-      queryClient.ensureQueryData({
-        queryKey: queryKeys.buckets,
-        queryFn: () => getBuckets(),
-      }),
-      queryClient.ensureQueryData({
-        queryKey: queryKeys.debts,
-        queryFn: () => getDebts(),
-      }),
-      queryClient.ensureQueryData({
-        queryKey: queryKeys.dashboard(deps.month),
-        queryFn: () => getDashboardSummary({ data: { month: deps.month } }),
-      }),
-      queryClient.ensureQueryData({
-        queryKey: queryKeys.insights(format(new Date(), "yyyy-'W'ww")),
-        queryFn: () => getCachedInsight(),
-      }),
-      queryClient.ensureQueryData({
-        queryKey: ["ai-status"],
-        queryFn: () => getAiStatus(),
-      }),
-    ])
+    await Promise.all(
+      dashboardQueryList(deps.month, deps.category).map((query) =>
+        queryClient.ensureQueryData(query as Parameters<typeof queryClient.ensureQueryData>[0]),
+      ),
+    )
   },
   component: DashboardPage,
 })
@@ -76,43 +47,15 @@ function DashboardPage() {
   const search = Route.useSearch()
   const navigate = Route.useNavigate()
   const queryClient = useQueryClient()
+  const queries = dashboardQueries(search.month, search.category)
 
-  const ratesQuery = useQuery({
-    queryKey: queryKeys.rates,
-    queryFn: () => getActiveRates(),
-  })
-
-  const transactionsQuery = useQuery({
-    queryKey: queryKeys.transactions(search.month, search.category),
-    queryFn: () =>
-      getTransactions({ data: { month: search.month, category: search.category } }),
-  })
-
-  const bucketsQuery = useQuery({
-    queryKey: queryKeys.buckets,
-    queryFn: () => getBuckets(),
-  })
-
-  const debtsQuery = useQuery({
-    queryKey: queryKeys.debts,
-    queryFn: () => getDebts(),
-  })
-
-  const summaryQuery = useQuery({
-    queryKey: queryKeys.dashboard(search.month),
-    queryFn: () => getDashboardSummary({ data: { month: search.month } }),
-  })
-
-  const insightQuery = useQuery({
-    queryKey: queryKeys.insights(format(new Date(), "yyyy-'W'ww")),
-    queryFn: () => getCachedInsight(),
-  })
-
-  const aiStatusQuery = useQuery({
-    queryKey: ["ai-status"],
-    queryFn: () => getAiStatus(),
-    staleTime: 60_000,
-  })
+  const ratesQuery = useQuery(queries.rates)
+  const transactionsQuery = useQuery(queries.transactions)
+  const bucketsQuery = useQuery(queries.buckets)
+  const debtsQuery = useQuery(queries.debts)
+  const summaryQuery = useQuery(queries.summary)
+  const insightQuery = useQuery(queries.insight)
+  const aiStatusQuery = useQuery(queries.aiStatus)
 
   const isOnline = useOnlineStatus()
   const queueSize = useSyncExternalStore(subscribeQueue, pendingCount, () => 0)
@@ -121,7 +64,7 @@ function DashboardPage() {
     mutationFn: () => generateWeeklyInsight({ data: { month: search.month } }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: queryKeys.insights(format(new Date(), "yyyy-'W'ww")),
+        queryKey: queryKeys.insights(currentWeekKey()),
       })
     },
   })

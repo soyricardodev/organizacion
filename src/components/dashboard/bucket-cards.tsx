@@ -1,6 +1,6 @@
 import { Panel, PanelBody, PanelHeader, PanelTitle } from "@/components/dashboard/panel"
 import { formatUsd, weeklyProrate } from "@/lib/money"
-import type { Bucket } from "@/types/db"
+import type { Bucket } from "@/db/schema"
 
 interface BucketCardsProps {
   buckets: Bucket[]

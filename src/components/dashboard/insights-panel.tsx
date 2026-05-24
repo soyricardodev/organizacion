@@ -1,13 +1,6 @@
 import { Panel, PanelBody, PanelHeader, PanelTitle } from "@/components/dashboard/panel"
 import { Button } from "@/components/ui/button"
-
-interface InsightData {
-  title: string
-  body: string
-  severity: "info" | "warning" | "critical"
-  recommendation?: string
-  model?: string | null
-}
+import type { InsightData } from "@/domain/insights/types"
 
 interface InsightsPanelProps {
   insight: InsightData | null | undefined

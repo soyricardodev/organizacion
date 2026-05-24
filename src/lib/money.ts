@@ -7,9 +7,10 @@ import {
   toDecimal,
   toSnapshot,
 } from "dinero.js"
+import type { Currency, MatchedRate } from "@/domain/types"
 
-export type CurrencyCode = "USD" | "VES" | "EUR"
-export type MatchedRate = "bcv" | "euro_bcv" | "paralelo"
+export type CurrencyCode = Currency
+export type { MatchedRate }
 
 export interface RateSnapshot {
   bcvRate: string

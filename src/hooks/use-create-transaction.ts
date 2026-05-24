@@ -6,9 +6,11 @@ import {
   removePendingTransaction,
   type PendingTransaction,
 } from "@/lib/offline-queue"
-import { convertToUsdCents, type CurrencyCode, type MatchedRate } from "@/lib/money"
-import type { Transaction } from "@/types/db"
+import { convertToUsdCents } from "@/lib/money"
+import type { Transaction } from "@/db/schema"
 import type { ActiveRates } from "@/lib/rates"
+import { buildExpensePayload } from "@/domain/transactions/build-expense-payload"
+import type { Category, Currency, MatchedRate } from "@/domain/types"
 
 function isOffline() {
   return typeof navigator !== "undefined" && !navigator.onLine
@@ -18,9 +20,9 @@ export interface CreateExpenseInput {
   tempId: string
   description: string
   originalAmountCents: number
-  originalCurrency: "VES" | "USD" | "EUR"
-  category: "needs" | "wants" | "savings" | "health" | "debt_payment"
-  matchedRate: "bcv" | "euro_bcv" | "paralelo"
+  originalCurrency: Currency
+  category: Category
+  matchedRate: MatchedRate
 }
 
 function buildOptimisticTransaction(
@@ -39,9 +41,9 @@ function buildOptimisticTransaction(
     originalCurrency: input.originalCurrency,
     usdCents: convertToUsdCents(
       input.originalAmountCents,
-      input.originalCurrency as CurrencyCode,
+      input.originalCurrency,
       rateSnapshot,
-      input.matchedRate as MatchedRate,
+      input.matchedRate,
     ),
     category: input.category,
     type: "expense",
@@ -52,6 +54,18 @@ function buildOptimisticTransaction(
     euroBcvRate: rates.euroBcvRate,
     paraleloRate: rates.paraleloRate,
     createdAt: new Date(),
+  }
+}
+
+function toPendingTransaction(input: CreateExpenseInput): PendingTransaction {
+  return {
+    id: input.tempId,
+    description: input.description,
+    originalAmountCents: input.originalAmountCents,
+    originalCurrency: input.originalCurrency,
+    category: input.category,
+    matchedRate: input.matchedRate,
+    enqueuedAt: Date.now(),
   }
 }
 
@@ -70,16 +84,7 @@ export function useCreateTransaction(month: string, category: string) {
         return buildOptimisticTransaction(input, rates)
       }
 
-      return createTransaction({
-        data: {
-          description: input.description,
-          originalAmountCents: input.originalAmountCents,
-          originalCurrency: input.originalCurrency,
-          category: input.category,
-          type: "expense",
-          matchedRate: input.matchedRate,
-        },
-      })
+      return createTransaction({ data: buildExpensePayload(toPendingTransaction(input)) })
     },
     onMutate: async (input) => {
       await queryClient.cancelQueries({ queryKey: txKey })
@@ -95,16 +100,7 @@ export function useCreateTransaction(month: string, category: string) {
       }
 
       if (isOffline()) {
-        const pending: PendingTransaction = {
-          id: input.tempId,
-          description: input.description,
-          originalAmountCents: input.originalAmountCents,
-          originalCurrency: input.originalCurrency,
-          category: input.category,
-          matchedRate: input.matchedRate,
-          enqueuedAt: Date.now(),
-        }
-        enqueueTransaction(pending)
+        enqueueTransaction(toPendingTransaction(input))
       }
 
       return { previous }
