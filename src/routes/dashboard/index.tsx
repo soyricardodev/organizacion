@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
+import { useState } from "react"
 import { dashboardSearchSchema } from "@/lib/search-params"
 import { queryKeys } from "@/lib/query-keys"
 import {
@@ -12,9 +13,13 @@ import { RatesWidget } from "@/components/dashboard/rates-widget"
 import { RunwayIndicator } from "@/components/dashboard/runway-indicator"
 import { DebtTimeline } from "@/components/dashboard/debt-timeline"
 import { BucketCards } from "@/components/dashboard/bucket-cards"
+import { BucketOperationSheet } from "@/components/dashboard/bucket-operation-sheet"
 import { ManualRatesModal } from "@/components/dashboard/manual-rates-modal"
 import { InsightsPanel } from "@/components/dashboard/insights-panel"
 import { QuickExpenseForm } from "@/components/dashboard/quick-expense-form"
+import { MonthSummary } from "@/components/dashboard/month-summary"
+import { CategoryBreakdown } from "@/components/dashboard/category-breakdown"
+import { DashboardFilters } from "@/components/dashboard/dashboard-filters"
 import { TransactionList } from "@/components/dashboard/transaction-list"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,10 +29,13 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { useOnlineStatus } from "@/hooks/use-online-status"
+import type { BucketOpMode } from "@/hooks/use-bucket-operation"
 import { pendingCount, subscribeQueue } from "@/lib/offline-queue"
 import { cn } from "@/lib/utils"
 import { useSyncExternalStore } from "react"
 import { currentWeekKey } from "@/domain/dates"
+import type { Bucket } from "@/db/schema"
+import type { FilterCategory } from "@/domain/types"
 
 export const Route = createFileRoute("/dashboard/")({
   validateSearch: dashboardSearchSchema,
@@ -57,6 +65,11 @@ function DashboardPage() {
   const insightQuery = useQuery(queries.insight)
   const aiStatusQuery = useQuery(queries.aiStatus)
 
+  const [bucketOp, setBucketOp] = useState<{
+    bucket: Bucket
+    mode: BucketOpMode
+  } | null>(null)
+
   const isOnline = useOnlineStatus()
   const queueSize = useSyncExternalStore(subscribeQueue, pendingCount, () => 0)
 
@@ -82,11 +95,24 @@ function DashboardPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-xs uppercase tracking-widest">organización</h1>
           <span className="text-[10px] text-muted-foreground tabular-nums uppercase tracking-widest">
-            {search.month}
-            {!isOnline && " · offline"}
-            {queueSize > 0 && ` · ${queueSize} pend.`}
+            {!isOnline && "offline"}
+            {isOnline && queueSize === 0 && "online"}
+            {queueSize > 0 && `${queueSize} pend.`}
           </span>
         </div>
+
+        <DashboardFilters
+          month={search.month}
+          category={search.category}
+          showCategoryFilter={tab === "transactions"}
+          onMonthChange={(month) =>
+            navigate({ search: (prev) => ({ ...prev, month }) })
+          }
+          onCategoryChange={(category: FilterCategory) =>
+            navigate({ search: (prev) => ({ ...prev, category }) })
+          }
+        />
+
         <nav className="mt-3 flex gap-1">
           {(["overview", "transactions"] as const).map((v) => (
             <button
@@ -123,6 +149,24 @@ function DashboardPage() {
         {tab === "overview" ? (
           <>
             {summary && (
+              <MonthSummary
+                totalIncome={summary.totalIncome}
+                totalSpent={summary.totalSpent}
+                totalAllocated={summary.totalAllocated}
+                totalReleased={summary.totalReleased}
+                netBalance={summary.netBalance}
+                availableBalance={summary.availableBalance}
+              />
+            )}
+
+            {summary && summary.totalIncome > 0 && (
+              <CategoryBreakdown
+                totalIncome={summary.totalIncome}
+                spendingByCategory={summary.spendingByCategory}
+              />
+            )}
+
+            {summary && (
               <RunwayIndicator
                 emergencyCents={summary.emergencyCents}
                 minimumMonthlyCostCents={summary.minimumMonthlyCostCents}
@@ -142,7 +186,12 @@ function DashboardPage() {
               />
             )}
 
-            {bucketsQuery.data && <BucketCards buckets={bucketsQuery.data} />}
+            {bucketsQuery.data && (
+              <BucketCards
+                buckets={bucketsQuery.data}
+                onOperation={(bucket, mode) => setBucketOp({ bucket, mode })}
+              />
+            )}
 
             <InsightsPanel
               insight={insightQuery.data}
@@ -153,7 +202,10 @@ function DashboardPage() {
             />
           </>
         ) : (
-          <TransactionList transactions={transactionsQuery.data ?? []} />
+          <TransactionList
+            transactions={transactionsQuery.data ?? []}
+            buckets={bucketsQuery.data ?? []}
+          />
         )}
       </main>
 
@@ -189,6 +241,8 @@ function DashboardPage() {
               aiModel={aiStatusQuery.data?.model}
               month={search.month}
               category={search.category}
+              debts={debtsQuery.data ?? []}
+              buckets={bucketsQuery.data ?? []}
               onSuccess={() => {
                 navigate({ search: (prev) => ({ ...prev, view: "overview" }) })
               }}
@@ -196,6 +250,17 @@ function DashboardPage() {
           </div>
         </SheetContent>
       </Sheet>
+
+      <BucketOperationSheet
+        open={bucketOp !== null}
+        mode={bucketOp?.mode ?? null}
+        bucket={bucketOp?.bucket ?? null}
+        buckets={bucketsQuery.data ?? []}
+        rates={ratesQuery.data}
+        month={search.month}
+        category={search.category}
+        onClose={() => setBucketOp(null)}
+      />
 
       <ManualRatesModal
         open={needsManualRates}

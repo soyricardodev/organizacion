@@ -41,3 +41,24 @@ export async function applyBucketFreezeEffect(
     .set({ frozenCents: bucket.frozenCents + usdCents })
     .where(eq(buckets.id, bucketId))
 }
+
+export async function applyBucketReleaseEffect(
+  tx: DbTx,
+  bucketId: string,
+  usdCents: number,
+) {
+  const [bucket] = await tx
+    .select()
+    .from(buckets)
+    .where(eq(buckets.id, bucketId))
+    .limit(1)
+
+  if (!bucket) return
+
+  await tx
+    .update(buckets)
+    .set({
+      frozenCents: Math.max(0, bucket.frozenCents - usdCents),
+    })
+    .where(eq(buckets.id, bucketId))
+}

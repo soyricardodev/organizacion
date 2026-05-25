@@ -22,3 +22,12 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   health: "Salud",
   debt_payment: "Abono deuda",
 }
+
+export const INCOME_CATEGORY_LABELS: Record<
+  "needs" | "wants" | "savings",
+  string
+> = {
+  needs: "Presupuesto necesidades",
+  wants: "Presupuesto deseos",
+  savings: "Para ahorro",
+}

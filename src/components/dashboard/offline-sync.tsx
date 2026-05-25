@@ -14,6 +14,8 @@ export function OfflineSync() {
       queryClient.invalidateQueries({ queryKey: queryKeys.rates })
       queryClient.invalidateQueries({ queryKey: ["transactions"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.buckets })
+      queryClient.invalidateQueries({ queryKey: queryKeys.debts })
     }
 
     flush()

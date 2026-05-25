@@ -52,8 +52,61 @@ export const transactionInputSchema = z.object({
 
 export type TransactionInput = z.infer<typeof transactionInputSchema>
 
+export const registerMovementSchema = transactionInputSchema
+  .extend({
+    freezeInBucketId: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.category === "debt_payment" && !data.debtId) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Selecciona la deuda a abonar.",
+        path: ["debtId"],
+      })
+    }
+    if (
+      data.freezeInBucketId &&
+      data.type !== "income" &&
+      !(data.type === "expense" && data.category === "savings")
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message:
+          "Solo puedes apartar en bucket con ingresos o gastos de ahorro.",
+        path: ["freezeInBucketId"],
+      })
+    }
+  })
+
+export type RegisterMovementInput = z.infer<typeof registerMovementSchema>
+
 export const expenseInputSchema = transactionInputSchema.extend({
   type: z.literal("expense").default("expense"),
 })
 
 export type ExpenseInput = z.infer<typeof expenseInputSchema>
+
+export const incomeInputSchema = transactionInputSchema.extend({
+  type: z.literal("income").default("income"),
+})
+
+export type IncomeInput = z.infer<typeof incomeInputSchema>
+
+export const REGISTERABLE_TRANSACTION_TYPES = ["expense", "income"] as const
+export type RegisterableTransactionType =
+  (typeof REGISTERABLE_TRANSACTION_TYPES)[number]
+
+export const INCOME_CATEGORIES = ["needs", "wants", "savings"] as const
+export type IncomeCategory = (typeof INCOME_CATEGORIES)[number]
+
+export function shouldFreezeInBucket(data: {
+  type?: TransactionType
+  category: Category
+  freezeInBucketId?: string
+}) {
+  return Boolean(
+    data.freezeInBucketId &&
+      (data.type === "income" ||
+        (data.type === "expense" && data.category === "savings")),
+  )
+}

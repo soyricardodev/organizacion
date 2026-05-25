@@ -1,4 +1,3 @@
-import { eq, and } from "drizzle-orm"
 import { db } from "@/db"
 import { transactions, buckets, debts } from "@/db/schema"
 import { MINIMUM_MONTHLY_COST_CENTS, DEBT_TARGET_DATE } from "@/lib/constants"
@@ -13,14 +12,22 @@ export async function getDashboardSummary(data: { month: string }) {
   const monthTransactions = await db
     .select()
     .from(transactions)
-    .where(
-      and(
-        transactionsInMonth(data.month, transactions),
-        eq(transactions.type, "expense"),
-      ),
-    )
+    .where(transactionsInMonth(data.month, transactions))
 
-  const spendingByCategory = monthTransactions.reduce(
+  const expenseTransactions = monthTransactions.filter(
+    (tx) => tx.type === "expense" || tx.type === "debt_payment",
+  )
+  const incomeTransactions = monthTransactions.filter(
+    (tx) => tx.type === "income",
+  )
+  const freezeTransactions = monthTransactions.filter(
+    (tx) => tx.type === "bucket_freeze",
+  )
+  const releaseTransactions = monthTransactions.filter(
+    (tx) => tx.type === "bucket_release",
+  )
+
+  const spendingByCategory = expenseTransactions.reduce(
     (acc, tx) => {
       acc[tx.category] = (acc[tx.category] ?? 0) + tx.usdCents
       return acc
@@ -28,7 +35,22 @@ export async function getDashboardSummary(data: { month: string }) {
     {} as Record<string, number>,
   )
 
-  const totalSpent = monthTransactions.reduce((sum, tx) => sum + tx.usdCents, 0)
+  const totalSpent = expenseTransactions.reduce(
+    (sum, tx) => sum + tx.usdCents,
+    0,
+  )
+  const totalIncome = incomeTransactions.reduce(
+    (sum, tx) => sum + tx.usdCents,
+    0,
+  )
+  const totalAllocated = freezeTransactions.reduce(
+    (sum, tx) => sum + tx.usdCents,
+    0,
+  )
+  const totalReleased = releaseTransactions.reduce(
+    (sum, tx) => sum + tx.usdCents,
+    0,
+  )
 
   const bucketRows = await db.select().from(buckets)
   const emergency = bucketRows.find((b) => b.slug === "emergency")
@@ -47,6 +69,12 @@ export async function getDashboardSummary(data: { month: string }) {
   return {
     spendingByCategory,
     totalSpent,
+    totalIncome,
+    totalAllocated,
+    totalReleased,
+    netBalance: totalIncome - totalSpent,
+    availableBalance:
+      totalIncome - totalSpent - totalAllocated + totalReleased,
     runway,
     emergencyCents: emergency?.frozenCents ?? 0,
     minimumMonthlyCostCents: MINIMUM_MONTHLY_COST_CENTS,

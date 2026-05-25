@@ -2,9 +2,13 @@ import { createServerFn } from "@tanstack/react-start"
 import { z } from "zod"
 import {
   ratesInputSchema,
-  transactionInputSchema,
+  registerMovementSchema,
   filterCategorySchema,
 } from "@/domain/types"
+import {
+  bucketOperationSchema,
+  bucketTransferSchema,
+} from "@/domain/transactions/bucket-operation-schemas"
 
 export const getActiveRates = createServerFn({ method: "GET" }).handler(
   async () => {
@@ -35,12 +39,39 @@ export const getTransactions = createServerFn({ method: "GET" })
   })
 
 export const createTransaction = createServerFn({ method: "POST" })
-  .inputValidator(transactionInputSchema)
+  .inputValidator(registerMovementSchema)
   .handler(async ({ data }) => {
-    const { applyTransaction } = await import(
-      "@/domain/transactions/apply-transaction"
+    const { registerMovement } = await import(
+      "@/domain/transactions/register-movement"
     )
-    return applyTransaction(data)
+    return registerMovement(data)
+  })
+
+export const allocateToBucket = createServerFn({ method: "POST" })
+  .inputValidator(bucketOperationSchema)
+  .handler(async ({ data }) => {
+    const { allocateToBucket } = await import(
+      "@/domain/transactions/allocate-bucket"
+    )
+    return allocateToBucket(data)
+  })
+
+export const releaseFromBucket = createServerFn({ method: "POST" })
+  .inputValidator(bucketOperationSchema)
+  .handler(async ({ data }) => {
+    const { releaseFromBucket } = await import(
+      "@/domain/transactions/release-bucket"
+    )
+    return releaseFromBucket(data)
+  })
+
+export const transferBetweenBuckets = createServerFn({ method: "POST" })
+  .inputValidator(bucketTransferSchema)
+  .handler(async ({ data }) => {
+    const { transferBetweenBuckets } = await import(
+      "@/domain/transactions/transfer-bucket"
+    )
+    return transferBetweenBuckets(data)
   })
 
 export const getBuckets = createServerFn({ method: "GET" }).handler(async () => {

@@ -5,22 +5,24 @@ vi.mock("@/server/finance", () => ({
 }))
 
 vi.mock("@/lib/offline-queue", () => ({
+  getPendingQueue: vi.fn(),
+  removePendingItem: vi.fn(),
   getPendingTransactions: vi.fn(),
   removePendingTransaction: vi.fn(),
 }))
 
 import { createTransaction } from "@/server/finance"
 import {
-  getPendingTransactions,
-  removePendingTransaction,
+  getPendingQueue,
+  removePendingItem,
 } from "@/lib/offline-queue"
 import { flushPendingTransactions } from "@/lib/sync/flush-pending-transactions"
 
 describe("flushPendingTransactions", () => {
   beforeEach(() => {
     vi.mocked(createTransaction).mockReset()
-    vi.mocked(getPendingTransactions).mockReset()
-    vi.mocked(removePendingTransaction).mockReset()
+    vi.mocked(getPendingQueue).mockReset()
+    vi.mocked(removePendingItem).mockReset()
     Object.defineProperty(globalThis, "navigator", {
       value: { onLine: true },
       configurable: true,
@@ -28,13 +30,15 @@ describe("flushPendingTransactions", () => {
   })
 
   it("syncs pending items and removes them from queue", async () => {
-    vi.mocked(getPendingTransactions).mockReturnValue([
+    vi.mocked(getPendingQueue).mockReturnValue([
       {
+        kind: "movement",
         id: "optimistic-1",
         description: "harina",
         originalAmountCents: 45000,
         originalCurrency: "VES",
         category: "needs",
+        type: "expense",
         matchedRate: "bcv",
         enqueuedAt: Date.now(),
       },
@@ -54,12 +58,13 @@ describe("flushPendingTransactions", () => {
         matchedRate: "bcv",
       },
     })
-    expect(removePendingTransaction).toHaveBeenCalledWith("optimistic-1")
+    expect(removePendingItem).toHaveBeenCalledWith("optimistic-1")
   })
 
   it("stops on first failure", async () => {
-    vi.mocked(getPendingTransactions).mockReturnValue([
+    vi.mocked(getPendingQueue).mockReturnValue([
       {
+        kind: "movement",
         id: "1",
         description: "a",
         originalAmountCents: 100,
@@ -69,6 +74,7 @@ describe("flushPendingTransactions", () => {
         enqueuedAt: Date.now(),
       },
       {
+        kind: "movement",
         id: "2",
         description: "b",
         originalAmountCents: 200,
@@ -83,6 +89,6 @@ describe("flushPendingTransactions", () => {
     const synced = await flushPendingTransactions()
 
     expect(synced).toBe(0)
-    expect(removePendingTransaction).not.toHaveBeenCalled()
+    expect(removePendingItem).not.toHaveBeenCalled()
   })
 })

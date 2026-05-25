@@ -1,12 +1,15 @@
+import { Button } from "@/components/ui/button"
 import { Panel, PanelBody, PanelHeader, PanelTitle } from "@/components/dashboard/panel"
 import { formatUsd, weeklyProrate } from "@/lib/money"
 import type { Bucket } from "@/db/schema"
+import type { BucketOpMode } from "@/hooks/use-bucket-operation"
 
 interface BucketCardsProps {
   buckets: Bucket[]
+  onOperation: (bucket: Bucket, mode: BucketOpMode) => void
 }
 
-export function BucketCards({ buckets }: BucketCardsProps) {
+export function BucketCards({ buckets, onOperation }: BucketCardsProps) {
   return (
     <Panel>
       <PanelHeader>
@@ -20,6 +23,8 @@ export function BucketCards({ buckets }: BucketCardsProps) {
             Math.round((bucket.frozenCents / bucket.targetCents) * 100),
           )
           const weekly = weeklyProrate(bucket.targetCents, bucket.frozenCents)
+          const canRelease = bucket.frozenCents > 0
+          const canTransfer = buckets.length > 1 && canRelease
 
           return (
             <div key={bucket.id} className="flex flex-col gap-2 px-4 py-3">
@@ -41,6 +46,37 @@ export function BucketCards({ buckets }: BucketCardsProps) {
               <p className="text-[10px] text-muted-foreground tabular-nums uppercase tracking-widest">
                 wk {formatUsd(weekly.current)}/{formatUsd(weekly.target)}
               </p>
+              <div className="flex flex-wrap gap-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 px-2 text-[10px] uppercase tracking-widest"
+                  onClick={() => onOperation(bucket, "allocate")}
+                >
+                  apartar
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 px-2 text-[10px] uppercase tracking-widest"
+                  disabled={!canRelease}
+                  onClick={() => onOperation(bucket, "release")}
+                >
+                  liberar
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 px-2 text-[10px] uppercase tracking-widest"
+                  disabled={!canTransfer}
+                  onClick={() => onOperation(bucket, "transfer")}
+                >
+                  mover
+                </Button>
+              </div>
             </div>
           )
         })}

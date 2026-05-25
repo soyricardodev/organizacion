@@ -7,6 +7,7 @@ import {
   categorySchema,
   currencySchema,
   matchedRateSchema,
+  shouldFreezeInBucket,
   transactionTypeSchema,
 } from "@/domain/types"
 
@@ -33,5 +34,37 @@ describe("domain type enums", () => {
     for (const type of TRANSACTION_TYPES) {
       expect(transactionTypeSchema.safeParse(type).success).toBe(true)
     }
+  })
+})
+
+describe("shouldFreezeInBucket", () => {
+  it("allows freeze on income", () => {
+    expect(
+      shouldFreezeInBucket({
+        type: "income",
+        category: "savings",
+        freezeInBucketId: "bucket-1",
+      }),
+    ).toBe(true)
+  })
+
+  it("allows freeze on savings expense", () => {
+    expect(
+      shouldFreezeInBucket({
+        type: "expense",
+        category: "savings",
+        freezeInBucketId: "bucket-1",
+      }),
+    ).toBe(true)
+  })
+
+  it("rejects freeze on non-savings expense", () => {
+    expect(
+      shouldFreezeInBucket({
+        type: "expense",
+        category: "needs",
+        freezeInBucketId: "bucket-1",
+      }),
+    ).toBe(false)
   })
 })
