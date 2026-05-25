@@ -1,14 +1,11 @@
 import { format, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
+import { Button } from "@/components/ui/button"
 import { Panel, PanelBody, PanelHeader, PanelTitle } from "@/components/dashboard/panel"
 import { formatUsd } from "@/lib/money"
+import type { Debt } from "@/db/schema"
 
-interface DebtItem {
-  id: string
-  name: string
-  totalCents: number
-  remainingCents: number
-  targetDate: string
+type DebtItem = Debt & {
   progressPercent: number
   daysRemaining: number
   dailyRequiredCents: number
@@ -21,6 +18,7 @@ interface DebtTimelineProps {
   debtProgressPercent: number
   debtTargetDate: string
   daysToDebtTarget: number
+  onEditDebt: (debt: DebtItem) => void
 }
 
 export function DebtTimeline({
@@ -30,6 +28,7 @@ export function DebtTimeline({
   debtProgressPercent,
   debtTargetDate,
   daysToDebtTarget,
+  onEditDebt,
 }: DebtTimelineProps) {
   return (
     <Panel>
@@ -72,6 +71,15 @@ export function DebtTimeline({
               <p className="text-[10px] text-muted-foreground tabular-nums uppercase tracking-widest">
                 {debt.daysRemaining}d · {formatUsd(debt.dailyRequiredCents)}/d
               </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-7 w-fit px-2 text-[10px] uppercase tracking-widest"
+                onClick={() => onEditDebt(debt)}
+              >
+                editar
+              </Button>
             </div>
           ))}
         </div>

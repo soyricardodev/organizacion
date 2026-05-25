@@ -9,6 +9,10 @@ import {
   bucketOperationSchema,
   bucketTransferSchema,
 } from "@/domain/transactions/bucket-operation-schemas"
+import {
+  updateDebtSchema,
+  updateBucketSchema,
+} from "@/domain/buckets/schemas"
 
 export const getActiveRates = createServerFn({ method: "GET" }).handler(
   async () => {
@@ -83,6 +87,20 @@ export const getDebts = createServerFn({ method: "GET" }).handler(async () => {
   const { getDebts } = await import("@/domain/buckets/get-buckets")
   return getDebts()
 })
+
+export const updateDebt = createServerFn({ method: "POST" })
+  .inputValidator(updateDebtSchema)
+  .handler(async ({ data }) => {
+    const { updateDebt } = await import("@/domain/buckets/update-debt")
+    return updateDebt(data)
+  })
+
+export const updateBucket = createServerFn({ method: "POST" })
+  .inputValidator(updateBucketSchema)
+  .handler(async ({ data }) => {
+    const { updateBucket } = await import("@/domain/buckets/update-bucket")
+    return updateBucket(data)
+  })
 
 export const getDashboardSummary = createServerFn({ method: "GET" })
   .inputValidator(z.object({ month: z.string().regex(/^\d{4}-\d{2}$/) }))

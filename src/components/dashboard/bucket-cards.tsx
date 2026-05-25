@@ -7,9 +7,10 @@ import type { BucketOpMode } from "@/hooks/use-bucket-operation"
 interface BucketCardsProps {
   buckets: Bucket[]
   onOperation: (bucket: Bucket, mode: BucketOpMode) => void
+  onEdit: (bucket: Bucket) => void
 }
 
-export function BucketCards({ buckets, onOperation }: BucketCardsProps) {
+export function BucketCards({ buckets, onOperation, onEdit }: BucketCardsProps) {
   return (
     <Panel>
       <PanelHeader>
@@ -47,6 +48,15 @@ export function BucketCards({ buckets, onOperation }: BucketCardsProps) {
                 wk {formatUsd(weekly.current)}/{formatUsd(weekly.target)}
               </p>
               <div className="flex flex-wrap gap-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 px-2 text-[10px] uppercase tracking-widest"
+                  onClick={() => onEdit(bucket)}
+                >
+                  editar
+                </Button>
                 <Button
                   type="button"
                   variant="outline"

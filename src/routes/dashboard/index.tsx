@@ -14,6 +14,8 @@ import { RunwayIndicator } from "@/components/dashboard/runway-indicator"
 import { DebtTimeline } from "@/components/dashboard/debt-timeline"
 import { BucketCards } from "@/components/dashboard/bucket-cards"
 import { BucketOperationSheet } from "@/components/dashboard/bucket-operation-sheet"
+import { EditBucketSheet } from "@/components/dashboard/edit-bucket-sheet"
+import { EditDebtSheet } from "@/components/dashboard/edit-debt-sheet"
 import { ManualRatesModal } from "@/components/dashboard/manual-rates-modal"
 import { InsightsPanel } from "@/components/dashboard/insights-panel"
 import { QuickExpenseForm } from "@/components/dashboard/quick-expense-form"
@@ -69,6 +71,10 @@ function DashboardPage() {
     bucket: Bucket
     mode: BucketOpMode
   } | null>(null)
+  const [editDebt, setEditDebt] = useState<
+    NonNullable<typeof debtsQuery.data>[number] | null
+  >(null)
+  const [editBucket, setEditBucket] = useState<Bucket | null>(null)
 
   const isOnline = useOnlineStatus()
   const queueSize = useSyncExternalStore(subscribeQueue, pendingCount, () => 0)
@@ -183,6 +189,7 @@ function DashboardPage() {
                 debtProgressPercent={summary.debtProgressPercent}
                 debtTargetDate={summary.debtTargetDate}
                 daysToDebtTarget={summary.daysToDebtTarget}
+                onEditDebt={setEditDebt}
               />
             )}
 
@@ -190,6 +197,7 @@ function DashboardPage() {
               <BucketCards
                 buckets={bucketsQuery.data}
                 onOperation={(bucket, mode) => setBucketOp({ bucket, mode })}
+                onEdit={setEditBucket}
               />
             )}
 
@@ -260,6 +268,18 @@ function DashboardPage() {
         month={search.month}
         category={search.category}
         onClose={() => setBucketOp(null)}
+      />
+
+      <EditDebtSheet
+        debt={editDebt}
+        month={search.month}
+        onClose={() => setEditDebt(null)}
+      />
+
+      <EditBucketSheet
+        bucket={editBucket}
+        month={search.month}
+        onClose={() => setEditBucket(null)}
       />
 
       <ManualRatesModal
