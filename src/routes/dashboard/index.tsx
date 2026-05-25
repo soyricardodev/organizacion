@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { Link } from "@tanstack/react-router"
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
 import { useState } from "react"
@@ -100,11 +101,19 @@ function DashboardPage() {
       <header className="sticky top-0 z-10 border-b border-border bg-background/80 px-4 py-4 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <h1 className="text-xs uppercase tracking-widest">organización</h1>
-          <span className="text-[10px] text-muted-foreground tabular-nums uppercase tracking-widest">
-            {!isOnline && "offline"}
-            {isOnline && queueSize === 0 && "online"}
-            {queueSize > 0 && `${queueSize} pend.`}
-          </span>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/loveops"
+              className="text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground"
+            >
+              loveops
+            </Link>
+            <span className="text-[10px] text-muted-foreground tabular-nums uppercase tracking-widest">
+              {!isOnline && "offline"}
+              {isOnline && queueSize === 0 && "online"}
+              {queueSize > 0 && `${queueSize} pend.`}
+            </span>
+          </div>
         </div>
 
         <DashboardFilters

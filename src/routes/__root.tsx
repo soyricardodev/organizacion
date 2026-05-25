@@ -22,7 +22,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           content: "width=device-width, initial-scale=1, viewport-fit=cover",
         },
         { title: "organización" },
-        { name: "description", content: "Finanzas personales — economía venezolana" },
+        { name: "description", content: "Finanzas y LoveOps — economía venezolana" },
         { name: "theme-color", content: "#0a0a0a" },
         { name: "apple-mobile-web-app-capable", content: "yes" },
         {

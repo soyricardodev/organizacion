@@ -18,3 +18,18 @@ export const defaultDashboardSearch: DashboardSearch = {
   category: "all",
   view: "overview",
 }
+
+export const loveopsSearchSchema = z.object({
+  month: z
+    .string()
+    .regex(/^\d{4}-\d{2}$/)
+    .default(format(new Date(), "yyyy-MM")),
+  tab: z.enum(["hoy", "actividades", "proyectos", "ajustes"]).default("hoy"),
+})
+
+export type LoveopsSearch = z.infer<typeof loveopsSearchSchema>
+
+export const defaultLoveopsSearch: LoveopsSearch = {
+  month: format(new Date(), "yyyy-MM"),
+  tab: "hoy",
+}

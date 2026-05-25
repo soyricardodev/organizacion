@@ -34,7 +34,7 @@ export default defineConfig({
       manifest: {
         name: "organización",
         short_name: "org",
-        description: "Finanzas personales — economía venezolana",
+        description: "Finanzas y LoveOps — economía venezolana",
         lang: "es",
         start_url: "/dashboard",
         scope: "/",
@@ -42,6 +42,18 @@ export default defineConfig({
         orientation: "portrait",
         theme_color: "#0a0a0a",
         background_color: "#0a0a0a",
+        shortcuts: [
+          {
+            name: "Finanzas",
+            url: "/dashboard",
+            icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
+          },
+          {
+            name: "LoveOps",
+            url: "/loveops",
+            icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
+          },
+        ],
         icons: [
           {
             src: "/icons/icon-192.png",
@@ -91,6 +103,7 @@ export default defineConfig({
         enabled: true,
         type: "module",
         navigateFallback: "/_shell.html",
+        suppressWarnings: true,
       },
     }),
   ],

@@ -10,4 +10,7 @@ export const queryKeys = {
     ["insights", weekStart] as const,
   dashboard: (month: string) => ["dashboard", month] as const,
   aiStatus: ["ai-status"] as const,
+  loveops: (month: string) => ["loveops", month] as const,
+  loveActivities: ["love-activities"] as const,
+  loveProjects: ["love-projects"] as const,
 }

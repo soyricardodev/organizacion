@@ -70,8 +70,69 @@ export const insights = sqliteTable("insights", {
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 })
 
+export const loveActivities = sqliteTable("love_activities", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  category: text("category", {
+    enum: ["ritual", "micro", "experience"],
+  }).notNull(),
+  tags: text("tags").notNull(),
+  costEstimation: text("cost_estimation", {
+    enum: ["zero", "low", "high"],
+  }).notNull(),
+  weatherPreference: text("weather_preference", {
+    enum: ["any", "rain", "cold"],
+  })
+    .notNull()
+    .default("any"),
+  frequencyDaysTarget: integer("frequency_days_target").notNull().default(7),
+  lastExecutedAt: integer("last_executed_at", { mode: "timestamp_ms" }),
+  notes: text("notes"),
+  active: integer("active", { mode: "boolean" }).notNull().default(true),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+})
+
+export const loveActivityLogs = sqliteTable("love_activity_logs", {
+  id: text("id").primaryKey(),
+  activityId: text("activity_id")
+    .references(() => loveActivities.id)
+    .notNull(),
+  notes: text("notes"),
+  executedAt: integer("executed_at", { mode: "timestamp_ms" }).notNull(),
+})
+
+export const loveHomeProjects = sqliteTable("love_home_projects", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  column: text("column", {
+    enum: ["ideas", "materials", "in_progress", "done"],
+  }).notNull(),
+  costEstimation: text("cost_estimation", {
+    enum: ["zero", "low", "high"],
+  })
+    .notNull()
+    .default("zero"),
+  notes: text("notes"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+})
+
+export const loveSettings = sqliteTable("love_settings", {
+  id: text("id").primaryKey(),
+  partnerName: text("partner_name").notNull(),
+  notificationsEnabled: integer("notifications_enabled", { mode: "boolean" })
+    .notNull()
+    .default(true),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+})
+
 export type ExchangeRate = typeof exchangeRates.$inferSelect
 export type Bucket = typeof buckets.$inferSelect
 export type Debt = typeof debts.$inferSelect
 export type Transaction = typeof transactions.$inferSelect
 export type Insight = typeof insights.$inferSelect
+export type LoveActivity = typeof loveActivities.$inferSelect
+export type LoveActivityLog = typeof loveActivityLogs.$inferSelect
+export type LoveHomeProject = typeof loveHomeProjects.$inferSelect
+export type LoveSettings = typeof loveSettings.$inferSelect

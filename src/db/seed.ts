@@ -1,6 +1,17 @@
 import "dotenv/config"
 import { db } from "./index"
-import { buckets, debts, exchangeRates } from "./schema"
+import {
+  buckets,
+  debts,
+  exchangeRates,
+  loveActivities,
+  loveHomeProjects,
+  loveSettings,
+} from "./schema"
+import {
+  buildHomeProjectSeedRows,
+  buildLoveActivitySeedRows,
+} from "@/domain/loveops/seed-data"
 
 /**
  * Estado inicial "desde cero": sin ahorros congelados, sin movimientos.
@@ -63,6 +74,28 @@ async function seed() {
       icon: "baby",
       createdAt: now,
     },
+    {
+      id: crypto.randomUUID(),
+      slug: "surprise_gifts",
+      name: "Regalos sorpresa",
+      targetCents: 200_00,
+      frozenCents: 0,
+      weeklyTargetCents: 10_00,
+      color: "chart-5",
+      icon: "gift",
+      createdAt: now,
+    },
+    {
+      id: crypto.randomUUID(),
+      slug: "date_night",
+      name: "Citas y salidas",
+      targetCents: 600_00,
+      frozenCents: 0,
+      weeklyTargetCents: 30_00,
+      color: "chart-1",
+      icon: "sparkles",
+      createdAt: now,
+    },
   ])
 
   await db.insert(debts).values([
@@ -95,7 +128,19 @@ async function seed() {
     },
   ])
 
-  console.log("Seed completado (estado inicial: ahorros en 0, sin movimientos).")
+  await db.insert(loveActivities).values(buildLoveActivitySeedRows(now))
+  await db.insert(loveHomeProjects).values(buildHomeProjectSeedRows(now))
+
+  await db.insert(loveSettings).values({
+    id: "default",
+    partnerName: process.env.LOVE_PARTNER_NAME?.trim() || "Natalia",
+    notificationsEnabled: true,
+    updatedAt: now,
+  })
+
+  console.log(
+    "Seed completado (estado inicial: ahorros en 0, sin movimientos, LoveOps cargado).",
+  )
 }
 
 seed().catch(console.error)
