@@ -24,6 +24,13 @@ export const getLoveActivities = createServerFn({ method: "GET" }).handler(
   },
 )
 
+export const getArchivedLoveActivities = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const { getArchivedLoveActivities } = await import("@/domain/loveops/get-activities")
+    return getArchivedLoveActivities()
+  },
+)
+
 export const getLoveHomeProjects = createServerFn({ method: "GET" }).handler(
   async () => {
     const { getLoveHomeProjects } = await import("@/domain/loveops/home-projects")

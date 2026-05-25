@@ -112,6 +112,12 @@ export const LOVE_COST_LABELS: Record<LoveCostLevel, string> = {
   high: "Alto (bucket)",
 }
 
+export const LOVE_WEATHER_LABELS: Record<LoveWeatherPreference, string> = {
+  any: "Cualquiera",
+  rain: "Lluvia",
+  cold: "Frío",
+}
+
 export const LOVE_PROJECT_COLUMN_LABELS: Record<LoveProjectColumn, string> = {
   ideas: "Ideas",
   materials: "Materiales",

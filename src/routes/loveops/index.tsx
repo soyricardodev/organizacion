@@ -16,6 +16,7 @@ import { LoveopsLogSheet } from "@/components/loveops/loveops-log-sheet"
 import { LoveopsAddActivity } from "@/components/loveops/loveops-add-activity"
 import { LoveopsEditActivitySheet } from "@/components/loveops/loveops-edit-activity-sheet"
 import { LoveopsSettingsPanel } from "@/components/loveops/loveops-settings-panel"
+import { LoveopsArchivedList } from "@/components/loveops/loveops-archived-list"
 import { DashboardFilters } from "@/components/dashboard/dashboard-filters"
 import { notifyLoveopsReminder } from "@/lib/loveops-notifications"
 import { queryKeys } from "@/lib/query-keys"
@@ -44,6 +45,7 @@ function LoveopsPage() {
 
   const summaryQuery = useQuery(queries.summary)
   const activitiesQuery = useQuery(queries.activities)
+  const archivedQuery = useQuery(queries.archivedActivities)
   const projectsQuery = useQuery(queries.projects)
   const aiStatusQuery = useQuery(queries.aiStatus)
 
@@ -64,6 +66,7 @@ function LoveopsPage() {
   function refreshLoveops() {
     queryClient.invalidateQueries({ queryKey: queryKeys.loveops(search.month) })
     queryClient.invalidateQueries({ queryKey: queryKeys.loveActivities })
+    queryClient.invalidateQueries({ queryKey: queryKeys.loveArchivedActivities })
   }
 
   useEffect(() => {
@@ -192,6 +195,12 @@ function LoveopsPage() {
               onEdit={setEditActivity}
               filter="experience"
             />
+            {archivedQuery.data && (
+              <LoveopsArchivedList
+                activities={archivedQuery.data}
+                onEdit={setEditActivity}
+              />
+            )}
           </>
         )}
 

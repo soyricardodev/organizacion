@@ -12,5 +12,6 @@ export const queryKeys = {
   aiStatus: ["ai-status"] as const,
   loveops: (month: string) => ["loveops", month] as const,
   loveActivities: ["love-activities"] as const,
+  loveArchivedActivities: ["love-archived-activities"] as const,
   loveProjects: ["love-projects"] as const,
 }

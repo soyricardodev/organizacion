@@ -27,6 +27,36 @@ function daysBetween(from: Date, to: Date) {
   return Math.floor((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24))
 }
 
+function enrichActivityRow(
+  row: typeof loveActivities.$inferSelect,
+  now: Date,
+): EnrichedLoveActivity {
+  const tags = parseLoveTags(row.tags)
+  const daysSinceLast = row.lastExecutedAt
+    ? daysBetween(row.lastExecutedAt, now)
+    : null
+  const daysOverdue =
+    daysSinceLast === null
+      ? row.frequencyDaysTarget
+      : Math.max(0, daysSinceLast - row.frequencyDaysTarget)
+
+  return {
+    id: row.id,
+    title: row.title,
+    category: row.category,
+    tags,
+    costEstimation: row.costEstimation,
+    weatherPreference: row.weatherPreference,
+    frequencyDaysTarget: row.frequencyDaysTarget,
+    lastExecutedAt: row.lastExecutedAt,
+    notes: row.notes,
+    active: row.active,
+    daysSinceLast,
+    daysOverdue,
+    isDue: row.active && daysOverdue > 0,
+  }
+}
+
 export async function getLoveActivities() {
   const rows = await db
     .select()
@@ -35,32 +65,18 @@ export async function getLoveActivities() {
     .orderBy(loveActivities.category, loveActivities.title)
 
   const now = new Date()
+  return rows.map((row) => enrichActivityRow(row, now))
+}
 
-  return rows.map((row): EnrichedLoveActivity => {
-    const tags = parseLoveTags(row.tags)
-    const daysSinceLast = row.lastExecutedAt
-      ? daysBetween(row.lastExecutedAt, now)
-      : null
-    const daysOverdue =
-      daysSinceLast === null
-        ? row.frequencyDaysTarget
-        : Math.max(0, daysSinceLast - row.frequencyDaysTarget)
-    return {
-      id: row.id,
-      title: row.title,
-      category: row.category,
-      tags,
-      costEstimation: row.costEstimation,
-      weatherPreference: row.weatherPreference,
-      frequencyDaysTarget: row.frequencyDaysTarget,
-      lastExecutedAt: row.lastExecutedAt,
-      notes: row.notes,
-      active: row.active,
-      daysSinceLast,
-      daysOverdue,
-      isDue: daysOverdue > 0,
-    }
-  })
+export async function getArchivedLoveActivities() {
+  const rows = await db
+    .select()
+    .from(loveActivities)
+    .where(eq(loveActivities.active, false))
+    .orderBy(loveActivities.title)
+
+  const now = new Date()
+  return rows.map((row) => enrichActivityRow(row, now))
 }
 
 export async function getDueLoveActivities(limit = 5) {

@@ -1,4 +1,5 @@
 import {
+  getArchivedLoveActivities,
   getLoveActivities,
   getLoveHomeProjects,
   getLoveopsSummary,
@@ -15,6 +16,10 @@ export function loveopsQueries(month: string) {
     activities: {
       queryKey: queryKeys.loveActivities,
       queryFn: () => getLoveActivities(),
+    },
+    archivedActivities: {
+      queryKey: queryKeys.loveArchivedActivities,
+      queryFn: () => getArchivedLoveActivities(),
     },
     projects: {
       queryKey: queryKeys.loveProjects,

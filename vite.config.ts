@@ -74,6 +74,7 @@ export default defineConfig({
         ],
       },
       workbox: {
+        importScripts: ["sw-notifications.js"],
         navigateFallback: "/_shell.html",
         navigateFallbackDenylist: [
           /^\/api\//,
