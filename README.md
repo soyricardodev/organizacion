@@ -25,9 +25,11 @@ pnpm dev
 
 ## Scripts
 
-- `pnpm dev` — desarrollo
+- `pnpm dev` — desarrollo (http://localhost:3000)
 - `pnpm db:push` — sincronizar esquema
-- `pnpm db:seed` — datos demo
+- `pnpm db:seed` — datos iniciales (ahorros en $0)
+- `pnpm db:reset` — borrar DB local y volver a sembrar desde cero
+- `pnpm db:studio` — editar deudas, buckets y metas
 
 ## UI
 
@@ -35,5 +37,8 @@ Dark mode por defecto, Geist Mono, estética minimalista tipo Vercel — bordes 
 
 ## Offline y PWA
 
-- **Offline hoy:** cache React Query + cola de mutaciones en `localStorage` + sync al reconectar.
-- **PWA (planificado):** ver [docs/PWA-PLAN.md](./docs/PWA-PLAN.md) — instalable, app shell precacheado, integración con TanStack Start + Nitro.
+- **Datos offline:** cache React Query + cola de mutaciones en `localStorage` + sync al reconectar.
+- **PWA:** instalable, service worker con app shell (`/_shell.html`), updates con prompt manual.
+- **Dev PWA:** el service worker está habilitado en desarrollo; para probar install en móvil usa HTTPS (p. ej. Cloudflare Tunnel).
+- **Build:** genera `sw.js` y `manifest.webmanifest` en `.output/public/`.
+- Detalle técnico: [docs/PWA-PLAN.md](./docs/PWA-PLAN.md)

@@ -2,6 +2,10 @@ import "dotenv/config"
 import { db } from "./index"
 import { buckets, debts, exchangeRates } from "./schema"
 
+/**
+ * Estado inicial "desde cero": sin ahorros congelados, sin movimientos.
+ * Las deudas y metas de buckets se conservan como referencia; edítalas en db:studio.
+ */
 async function seed() {
   const now = new Date()
 
@@ -20,7 +24,7 @@ async function seed() {
       slug: "health",
       name: "Fondo Médico",
       targetCents: 800_00,
-      frozenCents: 120_00,
+      frozenCents: 0,
       weeklyTargetCents: 80_00,
       color: "chart-2",
       icon: "heart-pulse",
@@ -31,7 +35,7 @@ async function seed() {
       slug: "emergency",
       name: "Maletas de Emergencia",
       targetCents: 2000_00,
-      frozenCents: 650_00,
+      frozenCents: 0,
       weeklyTargetCents: 100_00,
       color: "chart-3",
       icon: "shield",
@@ -42,7 +46,7 @@ async function seed() {
       slug: "anniversary",
       name: "Aniversario",
       targetCents: 400_00,
-      frozenCents: 40_00,
+      frozenCents: 0,
       weeklyTargetCents: 40_00,
       color: "chart-1",
       icon: "heart",
@@ -53,7 +57,7 @@ async function seed() {
       slug: "child_plan",
       name: "Plan El Niño",
       targetCents: 1200_00,
-      frozenCents: 200_00,
+      frozenCents: 0,
       weeklyTargetCents: 60_00,
       color: "chart-4",
       icon: "baby",
@@ -91,7 +95,7 @@ async function seed() {
     },
   ])
 
-  console.log("Seed completado.")
+  console.log("Seed completado (estado inicial: ahorros en 0, sin movimientos).")
 }
 
 seed().catch(console.error)
