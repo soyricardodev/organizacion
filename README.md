@@ -1,6 +1,8 @@
-# organización
+# Organización
 
-Plataforma de gestión financiera para la economía venezolana.
+Local-first personal finance software designed for the Venezuelan economy.
+
+> Experimental project. Use synthetic data when sharing screenshots or demos.
 
 **Stack:** TanStack Start · Drizzle · libSQL · Dinero.js · OpenRouter (AI SDK)
 
